@@ -5,12 +5,18 @@ local timeOffset = 0
 local timer = 0
 local freezeTime = false
 local blackout = false
+local blackoutLock = false
 
 RegisterNetEvent('vSync:updateWeather')
 AddEventHandler('vSync:updateWeather', function(NewWeather, newblackout)
     CurrentWeather = NewWeather
     blackout = newblackout
 end)
+
+function SetBlackoutLock(state)
+    blackoutLock = state
+end
+exports("SetBlackoutLock", SetBlackoutLock)
 
 Citizen.CreateThread(function()
     while true do
@@ -20,7 +26,9 @@ Citizen.CreateThread(function()
             Citizen.Wait(15000)
         end
         Citizen.Wait(100) -- Wait 0 seconds to prevent crashing.
-        SetBlackout(blackout)
+        if(not blackoutLock) then
+            SetArtificialLightsState(blackout)
+        end
         ClearOverrideWeather()
         ClearWeatherTypePersist()
         SetWeatherTypePersist(lastWeather)
